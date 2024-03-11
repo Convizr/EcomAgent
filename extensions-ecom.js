@@ -144,43 +144,51 @@ export const FileUploadExtension = {
       var data = new FormData();
       data.append('file', file);
 
+      // Eerst een server ophalen van Gofile
       try {
-        // Upload de file naar Gofile
-        const uploadResponse = await fetch('https://store1.gofile.io/uploadFile', {
-          method: 'POST',
-          body: data,
-        });
+        const serverResponse = await fetch('https://api.gofile.io/getServer');
+        const serverData = await serverResponse.json();
+        if (serverData.status === "ok") {
+          const uploadServer = serverData.data.server;
 
-        if (uploadResponse.ok) {
-          const uploadResult = await uploadResponse.json();
-          if (uploadResult.status === "ok") {
-            console.log('File uploaded:', uploadResult);
+          // Upload de file naar de verkregen server
+          const uploadUrl = `https://${uploadServer}.gofile.io/uploadFile`;
+          const uploadResponse = await fetch(uploadUrl, {
+            method: 'POST',
+            body: data,
+          });
 
-            // Genereer een directe link voor het geüploade bestand
-            const directLinkResponse = await fetch(`https://api.gofile.io/contents/${uploadResult.data.fileId}/directLinks`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${apiToken}`,
-              },
-            });
-
-            if (directLinkResponse.ok) {
-              const directLinkResult = await directLinkResponse.json();
-              console.log('Direct link:', directLinkResult.data.directLink);
-
-              fileUploadContainer.innerHTML = '<img src="https://s3.amazonaws.com/com.voiceflow.studio/share/check/check.gif" alt="Done" width="50" height="50">';
-              window.voiceflow.chat.interact({
-                type: 'complete',
-                payload: { file: directLinkResult.data.directLink },
+          if (uploadResponse.ok) {
+            const uploadResult = await uploadResponse.json();
+            if (uploadResult.status === "ok") {
+              // Genereer een directe link voor het geüploade bestand
+              const directLinkResponse = await fetch(`https://api.gofile.io/contents/${uploadResult.data.fileId}/directLinks`, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${apiToken}`,
+                },
               });
+
+              if (directLinkResponse.ok) {
+                const directLinkResult = await directLinkResponse.json();
+                console.log('Direct link:', directLinkResult.data.directLink);
+
+                fileUploadContainer.innerHTML = '<img src="https://s3.amazonaws.com/com.voiceflow.studio/share/check/check.gif" alt="Done" width="50" height="50">';
+                window.voiceflow.chat.interact({
+                  type: 'complete',
+                  payload: { file: directLinkResult.data.directLink },
+                });
+              } else {
+                throw new Error('Failed to generate direct link');
+              }
             } else {
-              throw new Error('Failed to generate direct link');
+              throw new Error('Upload failed: ' + uploadResult.status);
             }
           } else {
-            throw new Error('Upload failed: ' + uploadResult.status);
+            throw new Error('Upload failed: ' + uploadResponse.statusText);
           }
         } else {
-          throw new Error('Upload failed: ' + uploadResponse.statusText);
+          throw new Error('Failed to get server: ' + serverData.status);
         }
       } catch (error) {
         console.error(error);
