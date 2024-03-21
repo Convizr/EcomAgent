@@ -9,22 +9,31 @@ export const DatePickerExtension = {
 
     datePickerContainer.innerHTML = `
           <style>
+            .calendar-container {
+              padding: 20px; /* Vergroot de padding om de textbubble groter te maken */
+              background: white;
+              box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+              border-radius: 10px;
+              max-width: fit-content;
+            }
             .calendar {
               border: 1px solid #ccc;
               border-radius: 5px;
               padding: 10px;
             }
             input[type="date"] {
-              width: 100%;
+              max-width: 200px; /* Stel een maximale breedte in om de datepicker kleiner te maken */
               padding: 10px;
-              margin: 5px 0;
               border-radius: 5px;
               border: 1px solid #ccc;
               font-size: 16px;
+              cursor: pointer; /* Maakt het duidelijk dat je op het veld kan klikken */
             }
           </style>
-          <div class="calendar">
-            <input type="date" id="datePicker" name="datePicker" min="${today}">
+          <div class="calendar-container">
+            <div class="calendar">
+              <input type="date" id="datePicker" name="datePicker" min="${today}">
+            </div>
           </div>
         `;
 
@@ -38,6 +47,6 @@ export const DatePickerExtension = {
     });
 
     element.appendChild(datePickerContainer);
-    console.log('DatePicker rendered with future dates only');
+    console.log('DatePicker rendered with adjusted styles for larger bubble');
   },
 };
