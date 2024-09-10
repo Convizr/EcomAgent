@@ -116,7 +116,7 @@ export const GofileUploadExtension = {
       console.log('Payload:', payloadObj);
   
       const {
-        bt_submit, lb_quantity, lb_fullName, lb_email, lb_address, lb_appartmentNumber, lb_postalCode, lb_city, lb_country, lb_orderDetails
+        bt_submit, lb_quantity, lb_fullName, lb_email, lb_address, lb_appartmentNumber, lb_postalCode, lb_city, lb_country, lb_orderDetails, lb_personalInformation,
       } = payloadObj;
   
       const formContainer = document.createElement('form');
